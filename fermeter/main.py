@@ -1,5 +1,6 @@
 from gpio import Gpio
 from userInput import UserInput
+from storage import Storage
 
 from luma.core.interface.serial import i2c
 import luma.core.render
@@ -25,6 +26,8 @@ class Main(object):
 
         gpio = Gpio()
 
+        storage = Storage()
+
         with gpio: 
             userInput = UserInput(gpio)
 
@@ -43,6 +46,9 @@ class Main(object):
                         setTemp = userInput.temperatureGoal
 
                         heaterOn = currentTemp < setTemp
+
+                        storage.write_sensor_data(data, setTemp, heaterOn)
+
                         heater.set(heaterOn)
 
                         c.rectangle(device.bounding_box, fill="black")
