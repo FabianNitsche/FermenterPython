@@ -1,0 +1,6 @@
+Temperature Decrement GPIO PIN 24
+Temperature Increment GPIO PIN 23
+Thermometer BME280 I2CBus 3 (3c)
+Display SSD1306 I2CBus 1 (76)
+Light On GPIO PIN 25
+Heater Relay GPIO PIN 4
