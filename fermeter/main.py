@@ -1,3 +1,4 @@
+from photographer import Photographer
 from gpio import Gpio
 from userInput import UserInput
 from storage import Storage
@@ -10,6 +11,8 @@ from luma.oled.device import ssd1306
 import smbus2
 import bme280
 import bme280.const as oversampling
+
+import datetime, threading, time
 
 class Main(object):
         
@@ -28,10 +31,25 @@ class Main(object):
 
         storage = Storage()
 
+        # taking photos
+
         with gpio: 
             userInput = UserInput(gpio)
-
             heater = gpio.add_output(4, False)
+            photographer = Photographer(gpio)
+            photo_interval_seconds = 5 * 60
+
+            def take_photo():
+                next_call = time.time()
+                while True:
+                    photographer.save_photo()
+                    next_call += photo_interval_seconds
+                    time.sleep(next_call - time.time())
+            
+            photoThread = threading.Thread(target=take_photo)
+            photoThread.daemon = True
+            photoThread.start()
+
 
             try:
                 while True:
@@ -47,7 +65,7 @@ class Main(object):
 
                         heaterOn = currentTemp < setTemp
 
-                        storage.write_sensor_data(data, setTemp, heaterOn)
+                        storage.write_data(data, setTemp, heaterOn)
 
                         heater.set(heaterOn)
 
