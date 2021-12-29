@@ -1,4 +1,6 @@
-from gpio import Gpio, GpioOutput
+from gpio import Gpio
+from userInput import UserInput
+
 from luma.core.interface.serial import i2c
 import luma.core.render
 from luma.core.sprite_system import framerate_regulator
@@ -9,8 +11,6 @@ import bme280
 import bme280.const as oversampling
 
 class Main(object):
-    def __init__(self):
-        self.tempGoal = 30
         
     def start(self):
         regulator = framerate_regulator(fps=10)  # Unlimited = 0
@@ -26,29 +26,37 @@ class Main(object):
         gpio = Gpio()
 
         with gpio: 
-            def increment_temp(channel):
-                self.tempGoal += 1
-            def decrement_temp(channel):
-                self.tempGoal -= 1
-
-            gpio.add_input(23, increment_temp)
-            gpio.add_input(24, decrement_temp)
+            userInput = UserInput(gpio)
 
             heater = gpio.add_output(4, False)
 
             try:
                 while True:
+                    if userInput.exit:
+                        heater.set(False)
+                        os.system("sudo shutdown -h")
+                        break
+
                     with regulator, canvas as c:
                         data = bme280.sample(bus, address, calibration_params, oversampling.x4)
                         currentTemp = data.temperature
+                        setTemp = userInput.temperatureGoal
 
-                        heaterOn = currentTemp < self.tempGoal
+                        heaterOn = currentTemp < setTemp
                         heater.set(heaterOn)
 
                         c.rectangle(device.bounding_box, fill="black")
-                        c.text((padding, padding + 4), "Soll: {:.1f} °C".format(self.tempGoal), fill="white")
-                        c.text((padding, padding + 12), "Ist:  {:.1f} °C".format(currentTemp), fill="white")
-                        c.text((padding, padding + 20), "Heater:  {}".format("On" if heaterOn else "Off"), fill="white")
+
+                        title_size = c.textsize(userInput.title)
+                        c.text((device.width - padding - title_size[0], padding + 4), userInput.title, fill="white")
+
+                        c.text((padding, padding + 12), "Soll: {:.1f} °C".format(setTemp), fill="white")
+                        c.text((padding, padding + 20), "Ist:  {:.1f} °C".format(currentTemp), fill="white")
+                        c.text((padding, padding + 28), "Heater:  {}".format("On" if heaterOn else "Off"), fill="white")
+
+                        current_item = userInput.get_current_item()
+                        current_item_size = c.textsize(current_item)
+                        c.text((device.width - padding - current_item_size[0], padding + 36), current_item, fill="white")
             except KeyboardInterrupt:
                 pass
 
