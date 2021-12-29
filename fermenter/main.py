@@ -12,7 +12,7 @@ import smbus2
 import bme280
 import bme280.const as oversampling
 
-import datetime, threading, time
+import datetime, threading, time, os
 
 class Main(object):
         
@@ -33,7 +33,7 @@ class Main(object):
 
         # taking photos
 
-        with gpio: 
+        with gpio:
             userInput = UserInput(gpio)
             heater = gpio.add_output(4, False)
             photographer = Photographer(gpio)
