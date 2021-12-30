@@ -1,5 +1,3 @@
-import os
-
 upper_button_pin = 23
 lower_button_pin = 24
 

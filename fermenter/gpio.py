@@ -12,6 +12,7 @@ class Gpio(object):
         GPIO.cleanup()
 
     def add_input(self, pin, callback):
+        print("setting up input %s" % pin)
         if pin in self.ports:
             raise Exception("Input " + pin + " is already defined.")
         self.ports.append(pin)
@@ -19,8 +20,9 @@ class Gpio(object):
         GPIO.add_event_detect(pin, GPIO.RISING, bouncetime=200, callback=callback)
 
     def add_output(self, pin, onIsHigh):
+        print("setting up output %s" % pin)
         if pin in self.ports:
-            raise Exception("Input " + pin + " is already defined.")
+            raise Exception("Output " + pin + " is already defined.")
         self.ports.append(pin)
         GPIO.setup(pin, GPIO.OUT)
         return GpioOutput(pin, onIsHigh)
