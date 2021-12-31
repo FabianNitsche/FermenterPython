@@ -73,7 +73,10 @@ class Main(object):
                         heaterOn = currentTemp < setTemp
 
                         if next_store < time.time():
-                            storage.write_data(data, setTemp, heaterOn)
+                            try:
+                                storage.write_data(data, setTemp, heaterOn)
+                            except:
+                                pass
                             next_store += storage_interval_seconds
 
                         heater.set(heaterOn)
