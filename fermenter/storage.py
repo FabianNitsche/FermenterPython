@@ -7,6 +7,7 @@ class Storage(object):
 
     def write_data(self, data, setTemperature, heaterOn):
         time = self._get_time_string()
+        heater_power = heaterOn if 60.0 else 6.0
         json = [
             {
                 "measurement" : "temperature",
@@ -47,7 +48,7 @@ class Storage(object):
                 "measurement" : "heater_power",
                 "time" : time,
                 "fields" : {
-                    "value" : heaterOn if 60.0 else 6.0
+                    "value" : heater_power
                 }
             },
 
