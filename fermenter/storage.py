@@ -47,7 +47,7 @@ class Storage(object):
                 "measurement" : "heater_power",
                 "time" : time,
                 "fields" : {
-                    "value" : heaterOn if 56.0 else 6.0
+                    "value" : heaterOn if 60.0 else 6.0
                 }
             },
 
