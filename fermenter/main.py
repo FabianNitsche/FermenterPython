@@ -53,6 +53,8 @@ class Main(object):
             photoThread.daemon = True
             photoThread.start()
 
+            storage_interval_seconds = 10
+            next_store = time.time()
 
             try:
                 while True:
@@ -70,7 +72,9 @@ class Main(object):
 
                         heaterOn = currentTemp < setTemp
 
-                        storage.write_data(data, setTemp, heaterOn)
+                        if next_store < time.time():
+                            storage.write_data(data, setTemp, heaterOn)
+                            next_store += storage_interval_seconds
 
                         heater.set(heaterOn)
 
