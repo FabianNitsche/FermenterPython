@@ -36,10 +36,8 @@ class Main(object):
         with gpio:
             userInput = UserInput(gpio)
             heater = gpio.add_output(4, False)
-            light = gpio.add_output(25, True)
-            light.set(True)
 
-            photographer = Photographer()
+            photographer = Photographer(gpio)
             photo_interval_seconds = 5 * 60
 
             def take_photo():
@@ -59,13 +57,11 @@ class Main(object):
             try:
                 while True:
                     if userInput.exit:
-                        light.set(False)
                         heater.set(False)
                         os.system("sudo shutdown -h")
                         break
 
                     with regulator, canvas as c:
-                        light.set(not photographer.light)
                         data = bme280.sample(bus, address, calibration_params, oversampling.x4)
                         currentTemp = data.temperature
                         setTemp = userInput.temperatureGoal
@@ -73,10 +69,7 @@ class Main(object):
                         heaterOn = currentTemp < setTemp
 
                         if next_store < time.time():
-                            try:
-                                storage.write_data(data, setTemp, heaterOn)
-                            except:
-                                pass
+                            storage.write_data(data, setTemp, heaterOn)
                             next_store += storage_interval_seconds
 
                         heater.set(heaterOn)

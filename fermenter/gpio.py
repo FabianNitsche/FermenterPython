@@ -31,8 +31,8 @@ class Gpio(object):
 class GpioOutput(object):
     def __init__(self, pin, onIsHigh):
         self.pin = pin
-        self._on = onIsHigh if GPIO.HIGH else GPIO.LOW
-        self._off = onIsHigh if GPIO.LOW else GPIO.HIGH
+        self._on = GPIO.HIGH if onIsHigh else GPIO.LOW
+        self._off = GPIO.LOW if onIsHigh else GPIO.HIGH
     
     def set(self, on):
         if on:

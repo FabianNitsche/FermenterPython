@@ -7,50 +7,42 @@ class Storage(object):
 
     def write_data(self, data, setTemperature, heaterOn):
         time = self._get_time_string()
-        heater_power = heaterOn if 60.0 else 6.0
         json = [
             {
                 "measurement" : "temperature",
                 "time" : time,
                 "fields" : {
-                    "value" : self._format(data.temperature)
+                    "value" : round(data.temperature, 1)
                 }
             },
             {
                 "measurement" : "pressure",
                 "time" : time,
                 "fields" : {
-                    "value" : self._format(data.pressure)
+                    "value" : round(data.pressure)
                 }
             },
             {
                 "measurement" : "humidity",
                 "time" : time,
                 "fields" : {
-                    "value" : self._format(data.humidity)
+                    "value" : round(data.humidity, 1)
                 }
             },
             {
                 "measurement" : "set_temperature",
                 "time" : time,
                 "fields" : {
-                    "value" : setTemperature
+                    "value" : round(setTemperature, 1)
                 }
             },
             {
                 "measurement" : "heater",
                 "time" : time,
                 "fields" : {
-                    "value" : heaterOn if 1 else 0
+                    "value" : 60.0 if heaterOn else 6.0
                 }
-            },
-            {
-                "measurement" : "heater_power",
-                "time" : time,
-                "fields" : {
-                    "value" : heater_power
-                }
-            },
+            }
 
         ]
         self._write_to_db(json)
@@ -60,6 +52,3 @@ class Storage(object):
 
     def _get_time_string(self):
         return datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
-
-    def _format(self, number):
-        return "{:.1f}".format(number)
