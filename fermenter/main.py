@@ -36,9 +36,12 @@ class Main(object):
         with gpio:
             userInput = UserInput(gpio)
             heater = gpio.add_output(4, False)
+            light = gpio.add_output(25, True)
 
-            photographer = Photographer(gpio)
+            photographer = Photographer()
             photo_interval_seconds = 5 * 60
+
+            last_light_setting = photographer.light
 
             def take_photo():
                 next_call = time.time()
@@ -58,10 +61,15 @@ class Main(object):
                 while True:
                     if userInput.exit:
                         heater.set(False)
+                        light.set(False)
                         os.system("sudo shutdown -h")
                         break
 
                     with regulator, canvas as c:
+                        light_setting = photographer.light
+                        if light_setting != last_light_setting:
+                            light.set(light_setting)
+
                         data = bme280.sample(bus, address, calibration_params, oversampling.x4)
                         currentTemp = data.temperature
                         setTemp = userInput.temperatureGoal
@@ -94,7 +102,5 @@ class Main(object):
         device = ssd1306(serial)
         return device
 
-
 if __name__ == "__main__":
     Main().start()
-
