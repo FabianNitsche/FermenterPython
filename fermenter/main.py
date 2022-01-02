@@ -31,6 +31,8 @@ class Main(object):
 
         storage = Storage()
 
+        heating_hysteresis = 1
+
         # taking photos
 
         with gpio:
@@ -57,6 +59,8 @@ class Main(object):
             storage_interval_seconds = 10
             next_store = time.time()
 
+            heaterOn = False
+
             try:
                 while True:
                     if userInput.exit:
@@ -68,13 +72,16 @@ class Main(object):
                     with regulator, canvas as c:
                         light_setting = photographer.light
                         if light_setting != last_light_setting:
+                            last_light_setting = light_setting
                             light.set(light_setting)
 
                         data = bme280.sample(bus, address, calibration_params, oversampling.x4)
                         currentTemp = data.temperature
                         setTemp = userInput.temperatureGoal
-
-                        heaterOn = currentTemp < setTemp
+                        if currentTemp < setTemp - 0.5 * heating_hysteresis:
+                            heaterOn = True
+                        elif currentTemp > setTemp + 0.5 * heating_hysteresis:
+                            heaterOn = False
 
                         if next_store < time.time():
                             storage.write_data(data, setTemp, heaterOn)
