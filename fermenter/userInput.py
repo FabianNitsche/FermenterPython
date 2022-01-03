@@ -30,7 +30,7 @@ class UserInput(object):
 
     def _lower_button_pressed(self):
         current_item = self._current_item
-        if current_item == 0:
+        if current_item == 0 and self.temperatureGoal <= 34:
             self.temperatureGoal += 1
         elif current_item == 1:
             self.temperatureGoal -= 1
