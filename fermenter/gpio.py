@@ -1,4 +1,5 @@
 import RPi.GPIO as GPIO
+import logging
 
 class Gpio(object):
     def __init__(self):
@@ -13,14 +14,14 @@ class Gpio(object):
         GPIO.cleanup()
 
     def add_input(self, pin, callback):
-        print("setting up input %s" % pin)
+        logging.info("setting up input %s" % pin)
         if pin in self.ports:
             raise Exception("Input " + pin + " is already defined.")
         self.ports.append(pin)
         GpioInput(self, pin, callback)
 
     def add_output(self, pin, onIsHigh):
-        print("setting up output %s" % pin)
+        logging.info("setting up output %s" % pin)
         if pin in self.ports:
             raise Exception("Output " + pin + " is already defined.")
         self.ports.append(pin)
@@ -32,16 +33,20 @@ class GpioOutput(object):
     def __init__(self, gpio, pin, onIsHigh):
         self._gpio = gpio
         self.pin = pin
-        self._on = GPIO.HIGH if onIsHigh else GPIO.LOW
-        self._off = GPIO.LOW if onIsHigh else GPIO.HIGH
+        # self._on = GPIO.HIGH if onIsHigh else GPIO.LOW
+        # self._off = GPIO.LOW if onIsHigh else GPIO.HIGH
+        self._on = True if onIsHigh else False
+        self._off = False if onIsHigh else True
     
     def set(self, on):
         self._gpio.setting_output = True
         if on:
+            #logging.info("setting pin %s to %s (on)" % (self.pin, self._on))
             GPIO.output(self.pin, self._on)
         else:
+            #logging.info("setting pin %s to %s (off)" % (self.pin, self._off))
             GPIO.output(self.pin, self._off)
-        self._gpio.setting_output = True
+        self._gpio.setting_output = False
 
 class GpioInput(object):
     def __init__(self, gpio, pin, callback):

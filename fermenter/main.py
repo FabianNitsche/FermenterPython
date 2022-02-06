@@ -12,11 +12,17 @@ import smbus2
 import bme280
 import bme280.const as oversampling
 
-import datetime, threading, time, os
+import datetime, threading, time, os, logging
 
 class Main(object):
         
     def start(self):
+        logging.basicConfig(filename="/home/pi/FermenterPython/Pictures/log.txt", 
+                            filemode='a', 
+                            format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                            datefmt='%Y-%m-%d %H:%M:%S',
+                            level=logging.INFO)
+
         regulator = framerate_regulator(fps=10)  # Unlimited = 0
         device = self.get_device()
         port = 3
@@ -29,7 +35,7 @@ class Main(object):
 
         gpio = Gpio()
 
-        storage = Storage()
+        # storage = Storage()
 
         heating_hysteresis = 1
 
@@ -43,21 +49,26 @@ class Main(object):
             photographer = Photographer()
             photo_interval_seconds = 5 * 60
 
-            last_light_setting = photographer.light
+            # last_light_setting = photographer.light
 
-            def take_photo():
-                next_call = time.time()
-                while True:
-                    photographer.save_photo()
-                    next_call += photo_interval_seconds
-                    time.sleep(next_call - time.time())
+            # def take_photo():
+            #     logging.info("Starting photographer.")
+            #     next_call = time.time()
+            #     while True:
+            #         logging.info("Calling photographer.")
+            #         photographer.save_photo()
+            #         next_call += photo_interval_seconds
+            #         sleep_time = next_call - time.time()
+            #         logging.info("Sleeping " + sleep_time)
+            #         time.sleep(sleep_time)
             
-            photoThread = threading.Thread(target=take_photo)
-            photoThread.daemon = True
-            photoThread.start()
+            # photoThread = threading.Thread(target=take_photo)
+            # photoThread.daemon = True
+            # photoThread.start()
 
             storage_interval_seconds = 10
             next_store = time.time()
+            next_photo = time.time()
 
             heaterOn = False
 
@@ -70,10 +81,10 @@ class Main(object):
                         break
 
                     with regulator, canvas as c:
-                        light_setting = photographer.light
-                        if light_setting != last_light_setting:
-                            last_light_setting = light_setting
-                            light.set(light_setting)
+                        # light_setting = photographer.light
+                        # if light_setting != last_light_setting:
+                        #     last_light_setting = light_setting
+                        #     light.set(light_setting)
 
                         data = bme280.sample(bus, address, calibration_params, oversampling.x4)
                         currentTemp = data.temperature
@@ -84,7 +95,7 @@ class Main(object):
                             heaterOn = False
 
                         if next_store < time.time():
-                            storage.write_data(data, setTemp, heaterOn)
+                            # storage.write_data(data, setTemp, heaterOn)
                             next_store += storage_interval_seconds
 
                         heater.set(heaterOn)
@@ -96,11 +107,18 @@ class Main(object):
 
                         c.text((padding, padding + 12), "Soll: {:.1f} °C".format(setTemp), fill="white")
                         c.text((padding, padding + 20), "Ist:  {:.1f} °C".format(currentTemp), fill="white")
-                        c.text((padding, padding + 28), "Heater:  {}".format("On" if heaterOn else "Off"), fill="white")
+                        c.text((padding, padding + 28), "Heizer:  {}".format("An" if heaterOn else "Aus"), fill="white")
 
                         current_item = userInput.get_current_item()
                         current_item_size = c.textsize(current_item)
                         c.text((device.width - padding - current_item_size[0], padding + 36), current_item, fill="white")
+                        
+                        if next_photo < time.time():
+                            light.set(True)
+                            photographer.save_photo()
+                            light.set(False)
+                            next_photo += photo_interval_seconds
+
             except KeyboardInterrupt:
                 pass
 

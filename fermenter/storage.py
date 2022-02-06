@@ -1,5 +1,6 @@
 from influxdb import InfluxDBClient
 from datetime import datetime
+import time
 
 class Storage(object):
     def __init__(self):
@@ -48,7 +49,19 @@ class Storage(object):
         self._write_to_db(json)
 
     def _write_to_db(self, json):
-        self._client.write_points(json)
+        try:
+            self._client.write_points(json)
+        except:
+            try:
+                time.sleep(1)
+                self._client.write_points(json)
+            except:
+                try:
+                    time.sleep(1)
+                    self._client.write_points(json)
+                except:
+                    pass
+
 
     def _get_time_string(self):
         return datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")

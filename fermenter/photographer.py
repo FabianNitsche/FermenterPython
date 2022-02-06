@@ -1,6 +1,7 @@
 from picamera import PiCamera
 import time
 from datetime import datetime
+import logging
 
 class Photographer(object):
     def __init__(self):
@@ -14,8 +15,15 @@ class Photographer(object):
         self.light = True
         time.sleep(2)
 
-        filepath = "/home/pi/FermenterPython/Pictures/" + datetime.now().strftime("%Y_%m_%d__%H_%M_%S") + ".jpg"
-        self._camera.capture(filepath)
+        try:
+            filepath = "/home/pi/FermenterPython/Pictures/" + datetime.now().strftime("%Y_%m_%d__%H_%M_%S") + ".jpg"
+            logging.info("Taking image " + filepath)
+            self._camera.capture(filepath)
+            logging.info("Finished taking image.")
+        except Exception as e:
+            logging.info(e)
+            logging.warning(e)
+            pass
 
         self.light = False
 
