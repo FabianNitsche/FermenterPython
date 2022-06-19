@@ -7,7 +7,7 @@ class UserInput(object):
         self._menu_items = ["Wärmer", "Kälter", "Ausschalten"]
         self._current_item = 0
         self.title = "Auswahl"
-        self.temperatureGoal = 28
+        self.temperatureGoal = 30
         self.exit = False
 
         def upper_button_callback(channel):

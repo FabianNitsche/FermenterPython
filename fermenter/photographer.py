@@ -1,12 +1,12 @@
 from picamera import PiCamera
-import time
+import time, logging, shutil
 from datetime import datetime
-import logging
 
 class Photographer(object):
     def __init__(self):
         self._camera = PiCamera()
         time.sleep(2)
+        self._camera.rotation = 180
         self._camera.brightness = 60
         self._camera.contrast = 20
         self.light = False
@@ -20,6 +20,7 @@ class Photographer(object):
             logging.info("Taking image " + filepath)
             self._camera.capture(filepath)
             logging.info("Finished taking image.")
+            shutil.copyfile(filepath, "/usr/share/apache2/icons/fermenter/fermenter.jpg")
         except Exception as e:
             logging.info(e)
             logging.warning(e)
