@@ -1,12 +1,36 @@
-Dependencies (pip3 install)
+# Needed Packages
+apt install python3 python3-pip
+
+*picamera needs*
+apt install libopenjp2-7
+
+# Python Packages (pip3 install)
 luma.oled
-luma.bme280
+RPi.bme280
 RPi.GPIO
 picamera
 
+# Additional I2C Bus
+To setup the additional I2C Bus (3) add the following to /boot/config.txt and reboot
+
+dtoverlay=i2c-gpio,i2c_gpio_sda=5,i2c_gpio_scl=6,bus=3
+
+After the restart you should find the bus in
+ls /dev/i2c*
+
+# GPIO PIN setup
 Temperature Decrement GPIO PIN 24
 Temperature Increment GPIO PIN 23
-Thermometer BME280 I2CBus 3 (3c)
-Display SSD1306 I2CBus 1 (76)
+Thermometer BME280 I2CBus 3 (3c) - SDA PIN 5, SCL PIN 6
+Display SSD1306 I2CBus 1 (76) - SDA PIN 2, SCL PIN 3
 Light On GPIO PIN 25
 Heater Relay GPIO PIN 4 on is HIGH
+
+# For the buttons use pull down config
+    3.3V ---------------
+                       |
+                       \-| (trigger)
+                       |
+                       |---1k Ohm--- GPIO
+                       |
+    Ground ---10k Ohm---
